@@ -2,17 +2,19 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/wb-go/wbf/config"
 	"github.com/wb-go/wbf/dbpg"
 	"github.com/wb-go/wbf/redis"
 	"github.com/wb-go/wbf/zlog"
+	"github.com/yokitheyo/wb_level3_02/internal/api"
 	"github.com/yokitheyo/wb_level3_02/internal/app"
 	"github.com/yokitheyo/wb_level3_02/internal/cache"
+	"github.com/yokitheyo/wb_level3_02/internal/db"
 	"github.com/yokitheyo/wb_level3_02/internal/repo"
 	internalRetry "github.com/yokitheyo/wb_level3_02/internal/retry"
 	"github.com/yokitheyo/wb_level3_02/internal/service"
@@ -21,7 +23,7 @@ import (
 func main() {
 	zlog.Init()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
 	cfg := config.New()
@@ -30,15 +32,24 @@ func main() {
 	}
 
 	masterDSN := cfg.GetString("database.master")
+	slaves := []string{}
 	dbOpts := &dbpg.Options{
 		MaxOpenConns:    cfg.GetInt("database.max_open_conns"),
 		MaxIdleConns:    cfg.GetInt("database.max_idle_conns"),
 		ConnMaxLifetime: time.Duration(cfg.GetInt("database.conn_max_lifetime_sec")) * time.Second,
 	}
-	db, err := dbpg.New(masterDSN, nil, dbOpts)
+
+	database, err := dbpg.New(masterDSN, slaves, dbOpts)
 	if err != nil {
 		zlog.Logger.Fatal().Err(err).Msg("failed to connect to database")
 	}
+
+	// --- Миграции ---
+	if err := db.RunMigrations(database, "file://migrations"); err != nil {
+		zlog.Logger.Fatal().Err(err).Msg("failed to run migrations")
+	}
+
+	repo := repo.NewPostgresRepo(database, internalRetry.DefaultStrategy)
 
 	rdb := redis.New(
 		cfg.GetString("redis.addr"),
@@ -47,26 +58,16 @@ func main() {
 	)
 	cache := cache.NewRedisCache(rdb, "url:", internalRetry.DefaultStrategy)
 
-	repo := repo.NewPostgresRepo(db, internalRetry.DefaultStrategy)
 	svc := service.NewURLService(repo, cache)
+	app := app.NewApp(repo, cache, svc)
 
-	a := app.NewApp(repo, cache, svc)
-
+	apiServer := api.NewAPI(app)
 	go func() {
-		if err := a.Start(cfg.GetString("server.addr")); err != nil {
-			zlog.Logger.Fatal().Err(err).Msg("failed to start app")
+		if err := apiServer.Start(cfg.GetString("server.addr")); err != nil && err != http.ErrServerClosed {
+			zlog.Logger.Fatal().Err(err).Msg("failed to start API server")
 		}
 	}()
 
 	<-ctx.Done()
-	stop()
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := a.Stop(shutdownCtx); err != nil {
-		zlog.Logger.Error().Err(err).Msg("failed to stop server gracefully")
-	} else {
-		zlog.Logger.Info().Msg("server stopped gracefully")
-	}
+	apiServer.Stop(ctx)
 }

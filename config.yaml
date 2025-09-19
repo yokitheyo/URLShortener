@@ -1,0 +1,11 @@
+server:
+  addr: ":8080"
+database:
+  master: "postgres://user:pass@localhost/db"
+  max_open_conns: 10
+  max_idle_conns: 5
+  conn_max_lifetime_sec: 60
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0

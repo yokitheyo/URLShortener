@@ -44,6 +44,7 @@ services:
       - "8080:8080"
     volumes:
       - ./templates:/app/templates
+      - ./static:/app/static
 
 volumes:
   db_data:

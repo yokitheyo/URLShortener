@@ -247,6 +247,26 @@ async function getAnalytics(shortCode) {
     return data;
 }
 
+// Получение дополнительных данных для аналитики (клики по дням)
+async function getDetailedAnalytics(shortCode) {
+    try {
+        // Получаем данные за последние 7 дней
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+
+        const response = await fetch(`/analytics/${shortCode}/detailed?from=${startDate.toISOString()}&to=${endDate.toISOString()}`);
+
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.warn('Could not load detailed analytics:', error);
+    }
+
+    return null;
+}
+
 function showAnalyticsModal(data) {
     const modal = elements.analyticsModal;
     const title = document.getElementById('analytics-title');
@@ -256,16 +276,20 @@ function showAnalyticsModal(data) {
 
     title.textContent = `Аналитика: ${data.short}`;
     totalClicks.textContent = data.visit_count || 0;
-    todayClicks.textContent = data.today_clicks || 0;
-    mobilePercent.textContent = data.mobile_percent || '0%';
+
+    // Рассчитываем переходы за сегодня (если есть детальные данные)
+    const today = new Date().toISOString().split('T')[0];
+    todayClicks.textContent = '0'; // По умолчанию 0, можно расширить API для получения данных за сегодня
+
+    // Процент мобильных устройств - пока показываем 0%, нужно расширить API
+    mobilePercent.textContent = '0%';
 
     // Show modal with animation
     modal.classList.add('active');
     modal.style.animation = 'fadeIn 0.3s ease-out';
 
-    // Generate mock chart data for demonstration
+    // Генерируем график с реальными данными
     generateClicksChart(data);
-    loadRecentClicks(data);
 
     // Disable body scroll
     document.body.style.overflow = 'hidden';
@@ -288,7 +312,7 @@ function closeAnalytics() {
     }
 }
 
-function generateClicksChart(data) {
+async function generateClicksChart(data) {
     const canvas = document.getElementById('clicks-chart');
     const ctx = canvas.getContext('2d');
 
@@ -297,20 +321,32 @@ function generateClicksChart(data) {
         currentChart.destroy();
     }
 
-    // Generate mock data for the last 7 days
+    // Получаем детальную аналитику
+    const detailedData = await getDetailedAnalytics(data.short);
+
     const labels = [];
     const clickData = [];
     const today = new Date();
 
+    // Создаем данные за последние 7 дней
     for (let i = 6; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+
         labels.push(date.toLocaleDateString('ru-RU', {
             month: 'short',
             day: 'numeric'
         }));
-        // Generate random click data for demonstration
-        clickData.push(Math.floor(Math.random() * (data.visit_count || 10)));
+
+        // Используем реальные данные если есть, иначе 0
+        if (detailedData && detailedData.daily_clicks && detailedData.daily_clicks[dateStr]) {
+            clickData.push(detailedData.daily_clicks[dateStr]);
+        } else {
+            // Если детальных данных нет, распределяем общее количество переходов
+            // более равномерно по дням (это временное решение)
+            clickData.push(i === 0 ? (data.visit_count || 0) : 0);
+        }
     }
 
     currentChart = new Chart(ctx, {
@@ -362,49 +398,47 @@ function generateClicksChart(data) {
             }
         }
     });
+
+    // Загружаем список последних кликов
+    loadRecentClicks(data);
 }
 
-function loadRecentClicks(data) {
+async function loadRecentClicks(data) {
     const container = document.getElementById('recent-clicks');
 
-    // Generate mock recent clicks data
-    const recentClicks = [];
-    const clickCount = Math.min(data.visit_count || 0, 10);
+    try {
+        // Попытка получить реальные данные о кликах
+        const response = await fetch(`/analytics/${data.short}/clicks`);
 
-    for (let i = 0; i < clickCount; i++) {
-        const clickTime = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-        const devices = ['Desktop', 'Mobile', 'Tablet'];
-        const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge'];
-        const locations = ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg'];
+        if (response.ok) {
+            const clicksData = await response.json();
 
-        recentClicks.push({
-            time: clickTime,
-            device: devices[Math.floor(Math.random() * devices.length)],
-            browser: browsers[Math.floor(Math.random() * browsers.length)],
-            location: locations[Math.floor(Math.random() * locations.length)]
-        });
+            if (clicksData.clicks && clicksData.clicks.length > 0) {
+                container.innerHTML = clicksData.clicks.map(click => `
+                    <div class="click-item">
+                        <div class="click-info">
+                            <div class="time">${formatTimeAgo(new Date(click.occurred_at))}</div>
+                            <div class="details">${click.ip || 'Unknown IP'} • ${click.user_agent || 'Unknown Browser'}</div>
+                        </div>
+                        <div class="click-device">
+                            <i class="fas ${getDeviceIcon(click.device || 'desktop')}"></i>
+                            ${click.device || 'Desktop'}
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
+        }
+    } catch (error) {
+        console.warn('Could not load recent clicks:', error);
     }
 
-    // Sort by time (most recent first)
-    recentClicks.sort((a, b) => b.time - a.time);
-
-    if (recentClicks.length === 0) {
+    // Если реальных данных нет, показываем сообщение
+    if (data.visit_count === 0) {
         container.innerHTML = '<div class="no-data">Переходов пока нет</div>';
-        return;
+    } else {
+        container.innerHTML = '<div class="no-data">Детальная информация о переходах недоступна</div>';
     }
-
-    container.innerHTML = recentClicks.map(click => `
-        <div class="click-item">
-            <div class="click-info">
-                <div class="time">${formatTimeAgo(click.time)}</div>
-                <div class="details">${click.location} • ${click.browser}</div>
-            </div>
-            <div class="click-device">
-                <i class="fas ${getDeviceIcon(click.device)}"></i>
-                ${click.device}
-            </div>
-        </div>
-    `).join('');
 }
 
 function getDeviceIcon(device) {
@@ -443,9 +477,11 @@ function addToHistory(result) {
     // Keep only last 20 items
     history = history.slice(0, 20);
 
-    // Save to localStorage
+    // Save to localStorage (if available)
     try {
-        localStorage.setItem('urlHistory', JSON.stringify(history));
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('urlHistory', JSON.stringify(history));
+        }
     } catch (e) {
         console.warn('Could not save history to localStorage:', e);
     }
@@ -453,9 +489,11 @@ function addToHistory(result) {
 
 function loadHistory() {
     try {
-        const savedHistory = localStorage.getItem('urlHistory');
-        if (savedHistory) {
-            history = JSON.parse(savedHistory);
+        if (typeof(Storage) !== "undefined") {
+            const savedHistory = localStorage.getItem('urlHistory');
+            if (savedHistory) {
+                history = JSON.parse(savedHistory);
+            }
         }
     } catch (e) {
         console.warn('Could not load history from localStorage:', e);
@@ -525,11 +563,32 @@ function truncateUrl(url, length) {
 }
 
 function copyHistoryUrl(url) {
-    navigator.clipboard.writeText(url).then(() => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Ссылка скопирована!', 'success');
+        }).catch(() => {
+            fallbackCopyTextToClipboard(url);
+        });
+    } else {
+        fallbackCopyTextToClipboard(url);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        document.execCommand('copy');
         showToast('Ссылка скопирована!', 'success');
-    }).catch(() => {
+    } catch (err) {
         showToast('Не удалось скопировать ссылку', 'error');
-    });
+    }
+
+    document.body.removeChild(textArea);
 }
 
 async function viewHistoryAnalytics(shortCode) {
@@ -550,7 +609,9 @@ function deleteHistoryItem(id) {
         history = history.filter(item => item.id !== id);
 
         try {
-            localStorage.setItem('urlHistory', JSON.stringify(history));
+            if (typeof(Storage) !== "undefined") {
+                localStorage.setItem('urlHistory', JSON.stringify(history));
+            }
         } catch (e) {
             console.warn('Could not save history to localStorage:', e);
         }

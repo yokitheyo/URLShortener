@@ -13,6 +13,7 @@ import (
 	"github.com/yokitheyo/wb_level3_02/internal/cache"
 	"github.com/yokitheyo/wb_level3_02/internal/model"
 	"github.com/yokitheyo/wb_level3_02/internal/repo"
+	"github.com/yokitheyo/wb_level3_02/internal/util"
 )
 
 type URLService struct {
@@ -112,9 +113,26 @@ func (s *URLService) HandleRedirect(c *ginext.Context) {
 		}
 	}
 
+	var click *model.Click
 	if urlObj != nil {
 		if err := s.repo.IncrementVisits(ctx, urlObj.ID); err != nil {
 			zlog.Logger.Warn().Int64("url_id", urlObj.ID).Err(err).Msg("failed to increment visits")
+		}
+
+		click = &model.Click{
+			URLID:     urlObj.ID,
+			Short:     urlObj.Short,
+			Occurred:  time.Now().UTC(),
+			UserAgent: c.Request.UserAgent(),
+			IP:        c.ClientIP(),
+			Referrer:  c.Request.Referer(),
+			Device:    util.DetectDevice(c.Request.UserAgent()),
+		}
+	}
+
+	if click != nil {
+		if err := s.repo.SaveClick(ctx, click); err != nil {
+			zlog.Logger.Warn().Err(err).Msg("failed to save click")
 		}
 	}
 

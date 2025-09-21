@@ -142,3 +142,22 @@ func (r *PostgresRepo) AggregateByDay(ctx context.Context, short string, from, t
 	}
 	return res, nil
 }
+
+func (r *PostgresRepo) SaveClick(ctx context.Context, click *model.Click) error {
+	query := `
+        INSERT INTO clicks (url_id, short, occurred, user_agent, ip, referrer, device)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `
+
+	_, err := r.db.ExecContext(
+		ctx, query,
+		click.URLID,
+		click.Short,
+		click.Occurred,
+		click.UserAgent,
+		click.IP,
+		click.Referrer,
+		click.Device,
+	)
+	return err
+}

@@ -2,16 +2,6 @@
 
 A modern, production-ready URL shortening service built with Go, featuring clean architecture principles, comprehensive analytics, and a beautiful web interface.
 
-## 📋 Table of Contents
-
-- [Features](#features)
-- [Architecture & Design Patterns](#architecture--design-patterns)
-- [Quick Start with Docker](#quick-start-with-docker)
-- [API Endpoints](#api-endpoints)
-- [Visual Demo](#visual-demo)
-- [Project Structure](#project-structure)
-- [Technology Stack](#technology-stack)
-
 ## ✨ Features
 
 - **URL Shortening**: Create short links with optional custom codes

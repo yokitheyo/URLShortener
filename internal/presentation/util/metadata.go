@@ -2,9 +2,9 @@ package util
 
 import (
 	"github.com/wb-go/wbf/ginext"
-	"github.com/yokitheyo/wb_level3_02/internal/application/dto"
-	"github.com/yokitheyo/wb_level3_02/internal/infrastructure/geolocation"
-	"github.com/yokitheyo/wb_level3_02/internal/util"
+	"github.com/yokitheyo/URLShortener/internal/application/dto"
+	"github.com/yokitheyo/URLShortener/internal/infrastructure/geolocation"
+	"github.com/yokitheyo/URLShortener/internal/util"
 )
 
 // BuildClickMetadata extracts and builds click metadata from HTTP context

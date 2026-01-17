@@ -1,4 +1,4 @@
-module github.com/yokitheyo/wb_level3_02
+module github.com/yokitheyo/URLShortener
 
 go 1.24.0
 

@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/yokitheyo/wb_level3_02/internal/application/ports"
+	"github.com/yokitheyo/URLShortener/internal/application/ports"
 )
 
 // Ensure RedisCache implements ports.Cache interface

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yokitheyo/wb_level3_02/internal/presentation"
+	"github.com/yokitheyo/URLShortener/internal/presentation"
 )
 
 func ParseDateRange(fromStr, toStr string) (time.Time, time.Time) {

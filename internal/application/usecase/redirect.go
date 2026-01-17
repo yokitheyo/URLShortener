@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/wb-go/wbf/zlog"
-	"github.com/yokitheyo/wb_level3_02/internal/application/dto"
-	"github.com/yokitheyo/wb_level3_02/internal/domain"
+	"github.com/yokitheyo/URLShortener/internal/application/dto"
+	"github.com/yokitheyo/URLShortener/internal/domain"
 )
 
 func (uc *URLShortenerUseCase) Redirect(ctx context.Context, short string, meta dto.ClickMetadata) (string, error) {

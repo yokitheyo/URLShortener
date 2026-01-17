@@ -7,8 +7,8 @@ import (
 
 	"github.com/wb-go/wbf/dbpg"
 	wbfretry "github.com/wb-go/wbf/retry"
-	"github.com/yokitheyo/wb_level3_02/internal/domain"
-	internalRetry "github.com/yokitheyo/wb_level3_02/internal/retry"
+	"github.com/yokitheyo/URLShortener/internal/domain"
+	internalRetry "github.com/yokitheyo/URLShortener/internal/retry"
 )
 
 type PostgresURLRepository struct {

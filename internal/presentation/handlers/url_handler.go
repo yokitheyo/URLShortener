@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/wb-go/wbf/ginext"
-	"github.com/yokitheyo/wb_level3_02/internal/application/dto"
-	"github.com/yokitheyo/wb_level3_02/internal/application/usecase"
-	"github.com/yokitheyo/wb_level3_02/internal/presentation"
-	presentationdto "github.com/yokitheyo/wb_level3_02/internal/presentation/dto"
-	presentationutil "github.com/yokitheyo/wb_level3_02/internal/presentation/util"
+	"github.com/yokitheyo/URLShortener/internal/application/dto"
+	"github.com/yokitheyo/URLShortener/internal/application/usecase"
+	"github.com/yokitheyo/URLShortener/internal/presentation"
+	presentationdto "github.com/yokitheyo/URLShortener/internal/presentation/dto"
+	presentationutil "github.com/yokitheyo/URLShortener/internal/presentation/util"
 )
 
 type URLHandler struct {

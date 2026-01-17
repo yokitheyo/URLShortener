@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/yokitheyo/wb_level3_02/internal/application/usecase"
+	"github.com/yokitheyo/URLShortener/internal/application/usecase"
 )
 
 // MapErrorToStatus converts usecase errors to HTTP status codes

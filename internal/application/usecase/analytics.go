@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/wb-go/wbf/zlog"
-	"github.com/yokitheyo/wb_level3_02/internal/application/dto"
+	"github.com/yokitheyo/URLShortener/internal/application/dto"
 )
 
 func (uc *URLShortenerUseCase) GetAnalytics(ctx context.Context, query dto.AnalyticsQuery) (dto.AnalyticsResult, error) {

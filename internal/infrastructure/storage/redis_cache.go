@@ -6,7 +6,7 @@ import (
 
 	wbfredis "github.com/wb-go/wbf/redis"
 	wbfretry "github.com/wb-go/wbf/retry"
-	internalRetry "github.com/yokitheyo/wb_level3_02/internal/retry"
+	internalRetry "github.com/yokitheyo/URLShortener/internal/retry"
 )
 
 type RedisCache struct {

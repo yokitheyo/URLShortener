@@ -7,8 +7,8 @@ import (
 
 	"github.com/wb-go/wbf/ginext"
 	"github.com/wb-go/wbf/zlog"
-	"github.com/yokitheyo/wb_level3_02/internal/presentation/handlers"
-	"github.com/yokitheyo/wb_level3_02/internal/presentation/router"
+	"github.com/yokitheyo/URLShortener/internal/presentation/handlers"
+	"github.com/yokitheyo/URLShortener/internal/presentation/router"
 )
 
 type API struct {

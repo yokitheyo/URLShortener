@@ -3,8 +3,8 @@ package geolocation
 import (
 	"strings"
 
-	"github.com/yokitheyo/wb_level3_02/internal/geoip"
-	"github.com/yokitheyo/wb_level3_02/internal/util"
+	"github.com/yokitheyo/URLShortener/internal/geoip"
+	"github.com/yokitheyo/URLShortener/internal/util"
 )
 
 type GeoIPServiceImpl struct {

@@ -65,8 +65,8 @@ This project implements several industry-standard patterns:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yokitheyo/wb_level3_02.git
-cd wb_level3_02
+git clone https://github.com/yokitheyo/URLShortener.git
+cd URLShortener
 
 # Start all services (PostgreSQL, Redis, API)
 docker-compose up --build

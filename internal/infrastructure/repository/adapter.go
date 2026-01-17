@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/yokitheyo/wb_level3_02/internal/application/ports"
+	"github.com/yokitheyo/URLShortener/internal/application/ports"
 )
 
 // PostgresURLRepository implements ports.URLRepository interface

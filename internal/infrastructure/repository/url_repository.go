@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/yokitheyo/wb_level3_02/internal/domain"
+	"github.com/yokitheyo/URLShortener/internal/domain"
 )
 
 type URLRepository interface {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/wb-go/wbf/zlog"
 
-	"github.com/yokitheyo/wb_level3_02/internal/builder"
-	"github.com/yokitheyo/wb_level3_02/internal/config"
+	"github.com/yokitheyo/URLShortener/internal/builder"
+	"github.com/yokitheyo/URLShortener/internal/config"
 )
 
 func main() {

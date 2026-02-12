@@ -21,9 +21,12 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	DSN            string `mapstructure:"dsn"`
-	Migrate        bool   `mapstructure:"migrate"`
-	MigrationsPath string `mapstructure:"migrations_path"`
+	DSN                string `mapstructure:"dsn"`
+	Migrate            bool   `mapstructure:"migrate"`
+	MigrationsPath     string `mapstructure:"migrations_path"`
+	MaxOpenConns       int    `mapstructure:"max_open_conns"`
+	MaxIdleConns       int    `mapstructure:"max_idle_conns"`
+	ConnMaxLifetimeSec int    `mapstructure:"conn_max_lifetime_sec"`
 }
 
 type RedisConfig struct {

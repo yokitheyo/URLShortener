@@ -39,14 +39,16 @@ type AppBuilder struct {
 }
 
 func NewAppBuilder(cfg *config.Config) *AppBuilder {
+	dbOpts := &dbpg.Options{
+		MaxOpenConns:    cfg.Database.MaxOpenConns,
+		MaxIdleConns:    cfg.Database.MaxIdleConns,
+		ConnMaxLifetime: time.Duration(cfg.Database.ConnMaxLifetimeSec) * time.Second,
+	}
+
 	return &AppBuilder{
 		config:   cfg,
 		retryStr: internalRetry.DefaultStrategy,
-		dbOpts: &dbpg.Options{
-			MaxOpenConns:    10,
-			MaxIdleConns:    5,
-			ConnMaxLifetime: 300 * time.Second,
-		},
+		dbOpts:   dbOpts,
 	}
 }
 
